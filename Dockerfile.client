@@ -1,0 +1,25 @@
+ARG NODE_VERSION=16
+ARG CLIENT_PORT=3000
+
+FROM node:$NODE_VERSION-alpine as builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN apk add yarn && yarn build:prod-client && rm -rf /usr/local/share/.cache
+
+FROM node:$NODE_VERSION-alpine as production
+
+WORKDIR /app
+
+COPY --from=builder /app/packages/client/dist/ /app/
+COPY --from=builder /app/packages/client/package.json /app/package.json
+COPY --from=builder /app/yarn.lock /app/yarn.lock
+COPY --from=builder /app/.env /app/.env
+
+RUN apk add yarn && yarn install --frozen-lockfile --production && rm -rf /usr/local/share/.cache
+
+EXPOSE $CLIENT_PORT
+
+CMD ["yarn", "serve:prod"]

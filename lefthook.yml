@@ -1,0 +1,11 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: yarn format 
+    lint:
+      run: yarn lint
+commit-msg:
+  commands:
+    commitlint:
+      run: yarn commitlint --edit "{1}"
